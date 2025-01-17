@@ -1,11 +1,23 @@
-import os
-from flask import Flask
+from telegram.ext import Application, CommandHandler
+import logging
 
-app = Flask(__name__)
+# Настройка Telegram Bot
+TELEGRAM_TOKEN = "7648873218:AAHgzpTF8jMosAsT2BFJPyfg9aU_sfaBD9Q"
 
-@app.route("/", methods=["GET"])
-def home():
-    return "Сервер Flask работает!", 200
+# Логирование
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
+# Инициализация Telegram Bot
+application = Application.builder().token(TELEGRAM_TOKEN).build()
+
+# Команда /start
+async def start_command(update, context):
+    await update.message.reply_text("👋 Добро пожаловать! Бот работает через polling.")
+
+# Добавление команды
+application.add_handler(CommandHandler("start", start_command))
+
+# Запуск polling
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 8080)))
+    application.run_polling()
