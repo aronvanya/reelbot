@@ -16,7 +16,6 @@ loader = instaloader.Instaloader()
 user_languages = {}
 
 # Функция для загрузки рилсов
-
 def download_reel(url):
     try:
         post = instaloader.Post.from_shortcode(loader.context, url.split("/")[-2])
@@ -45,11 +44,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         "vi": "Không thể tải video. Vui lòng kiểm tra liên kết."
     }.get(language, "Не удалось загрузить видео. Проверьте ссылку.")
 
-    success_message_text = {
-        "ru": "Ошибка при отправке видео.",
-        "en": "Error while sending the video.",
-        "vi": "Lỗi khi gửi video."
-    }.get(language, "Ошибка при отправке видео.")
+    user_sent_text = {
+        "ru": "Видео отправлено пользователем: {user_name}",
+        "en": "Video sent by user: {user_name}",
+        "vi": "Video được gửi bởi người dùng: {user_name}"
+    }.get(language, "Видео отправлено пользователем: {user_name}")
 
     print(f"Получено обновление: {update}")
 
@@ -61,7 +60,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     user_name = update.effective_user.first_name
 
     if "instagram.com/reel/" in url or "instagram.com/p/" in url:
-        loading_message = await update.message.reply_text(loading_message_text, reply_markup=language_keyboard(user_id))
+        loading_message = await update.message.reply_text(loading_message_text)
         print("Проверяем ссылку...")
         video_path = download_reel(url)
     else:
@@ -76,7 +75,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             cap.release()
 
             print("Отправляем видео в чат...")
-            caption_text = f"Видео отправлено пользователем: {user_name}"
+            caption_text = user_sent_text.format(user_name=user_name)
             await context.bot.send_video(
                 chat_id=update.effective_chat.id,
                 video=open(video_path, 'rb'),
@@ -87,31 +86,15 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             )
             await loading_message.delete()
             os.remove(video_path)
-            # Удаляем сообщение с ссылкой пользователя
             if update.message:
                 await update.message.delete()
         except Exception as e:
             print(f"Ошибка отправки видео: {e}")
             if loading_message:
-                await loading_message.edit_text(success_message_text)
+                await loading_message.edit_text(error_message_text)
     else:
         if loading_message:
             await loading_message.edit_text(error_message_text)
-
-# Функция для выбора языка
-async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text(
-        "Выберите язык / Choose your language / Chọn ngôn ngữ:",
-        reply_markup=language_keyboard(update.effective_user.id)
-    )
-
-# Функция для создания клавиатуры языка
-def language_keyboard(user_id):
-    return InlineKeyboardMarkup([
-        [InlineKeyboardButton("Русский", callback_data=f"lang_ru_{user_id}")],
-        [InlineKeyboardButton("English", callback_data=f"lang_en_{user_id}")],
-        [InlineKeyboardButton("Tiếng Việt", callback_data=f"lang_vi_{user_id}")]
-    ])
 # Функция для обработки выбора языка
 async def language_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
@@ -193,8 +176,7 @@ def main():
     if not os.path.exists("reels"):
         os.makedirs("reels")
 
-    # Добавляем вызов keep_alive()
-    keep_alive()
+    keep_alive()  # Для поддержки активности на Render
 
     application = Application.builder().token(TELEGRAM_TOKEN).build()
 
@@ -205,7 +187,12 @@ def main():
     application.add_error_handler(error_handler)
 
     print("Бот запущен. Нажмите Ctrl+C для завершения.")
-    application.run_polling()
+    application.run_webhook(
+        listen="0.0.0.0",
+        port=int(os.getenv("PORT", "8080")),
+        url_path="webhook",
+        webhook_url=f"https://{os.getenv('RENDER_EXTERNAL_URL')}/webhook"
+    )
 
 if __name__ == "__main__":
     main()
