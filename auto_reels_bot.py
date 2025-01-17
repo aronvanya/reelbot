@@ -54,6 +54,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     print(f"Получено обновление: {update}")
 
     url = update.message.text.strip()
+    user_name = update.effective_user.first_name
+
     if "instagram.com/reel/" in url or "instagram.com/p/" in url:
         loading_message = await update.message.reply_text(loading_message_text, reply_markup=language_keyboard(user_id))
         print("Проверяем ссылку...")
@@ -69,12 +71,14 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             cap.release()
 
             print("Отправляем видео в чат...")
+            caption_text = f"Видео отправлено пользователем: {user_name}"
             await context.bot.send_video(
                 chat_id=update.effective_chat.id,
                 video=open(video_path, 'rb'),
                 width=width,
                 height=height,
-                supports_streaming=True
+                supports_streaming=True,
+                caption=caption_text
             )
             await loading_message.delete()
             os.remove(video_path)
@@ -147,7 +151,7 @@ async def language_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) 
             "Tôi là trợ lý của bạn để tải video Reels từ Instagram trực tiếp vào Telegram. 📲\n\n"
             "💡 **Tôi hoạt động như thế nào?**\n"
             "1️⃣ Sao chép liên kết tới video Reels từ Instagram.\n"
-            "2️⃣ Gửi liên kết vào cuộc trò chuyện này hoặc nhóm/kênh mà tôi đã được thêm vào.
+            "2️⃣ Gửi liên kết vào cuộc trò chuyện này hoặc nhóm/kênh mà tôi đã được thêm vào.\n"
             "3️⃣ Tôi sẽ tải video và gửi nó đến nhóm hoặc kênh của bạn.\n\n"
             "🛠 **Làm thế nào để thêm tôi vào nhóm hoặc kênh?**\n"
             "1️⃣ Thêm tôi vào nhóm/kênh.\n"
