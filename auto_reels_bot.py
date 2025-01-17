@@ -88,12 +88,15 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             await loading_message.delete()
             os.remove(video_path)
             # Удаляем сообщение с ссылкой пользователя
-            await update.message.delete()
+            if update.message:
+                await update.message.delete()
         except Exception as e:
             print(f"Ошибка отправки видео: {e}")
-            await loading_message.edit_text(success_message_text)
+            if loading_message:
+                await loading_message.edit_text(success_message_text)
     else:
-        await loading_message.edit_text(error_message_text)
+        if loading_message:
+            await loading_message.edit_text(error_message_text)
 
 # Функция для выбора языка
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -118,7 +121,11 @@ async def language_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         print("Неверный или отсутствующий callback query")
         return
 
-    await query.answer()
+    try:
+        await query.answer()
+    except Exception as e:
+        print(f"Ошибка callback query: {e}")
+        return
 
     data = query.data.split("_")
     lang = data[1]
@@ -172,6 +179,15 @@ async def language_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
     await query.edit_message_text(instruction, parse_mode="Markdown", reply_markup=language_keyboard(user_id))
 
+# Функция для обработки ошибок
+async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+    print(f"Исключение поймано: {context.error}")
+    if update and isinstance(update, Update):
+        try:
+            await update.message.reply_text("Произошла ошибка. Попробуйте позже.")
+        except Exception as e:
+            print(f"Ошибка при отправке сообщения об ошибке: {e}")
+
 # Основная функция
 def main():
     if not os.path.exists("reels"):
@@ -181,6 +197,15 @@ def main():
     keep_alive()
 
     application = Application.builder().token(TELEGRAM_TOKEN).build()
+
     application.add_handler(CommandHandler("start", start_command))
     application.add_handler(CallbackQueryHandler(language_callback, pattern=r"^lang_.*"))
-    application.add_handler(MessageHandler(filters.TEXT & (filters.Chat(GROUP_CHAT_ID) | filters.ChatType.PRIVATE
+    application.add_handler(MessageHandler(filters.TEXT & (filters.Chat(GROUP_CHAT_ID) | filters.ChatType.PRIVATE), handle_message))
+
+    application.add_error_handler(error_handler)
+
+    print("Бот запущен. Нажмите Ctrl+C для завершения.")
+    application.run_polling()
+
+if __name__ == "__main__":
+    main()
