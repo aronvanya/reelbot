@@ -1,8 +1,2 @@
-instaloader
-opencv-python
-python-telegram-bot[webhooks]==20.3
-telegram
+python-telegram-bot==20.3
 flask
-youtube-dl
-yt-dlp
-requests
