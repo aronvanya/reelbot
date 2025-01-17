@@ -1,0 +1,8 @@
+instaloader
+opencv-python
+python-telegram-bot==20.3
+telegram
+flask
+youtube-dl
+yt-dlp
+requests
