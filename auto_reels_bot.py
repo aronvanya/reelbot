@@ -17,11 +17,9 @@ user_languages = {}
 
 # Функция для загрузки рилсов
 
-
 def download_reel(url):
     try:
-        post = instaloader.Post.from_shortcode(loader.context,
-                                               url.split("/")[-2])
+        post = instaloader.Post.from_shortcode(loader.context, url.split("/")[-2])
         loader.download_post(post, target="reels")
         for file in os.listdir("reels"):
             if file.endswith(".mp4"):
@@ -30,10 +28,8 @@ def download_reel(url):
         print(f"Ошибка загрузки рилса: {e}")
         return None
 
-
 # Обработка сообщений с ссылками
-async def handle_message(update: Update,
-                         context: ContextTypes.DEFAULT_TYPE) -> None:
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_id = update.effective_user.id
     language = user_languages.get(user_id, "ru")  # По умолчанию русский
 
@@ -55,10 +51,12 @@ async def handle_message(update: Update,
         "vi": "Lỗi khi gửi video."
     }.get(language, "Ошибка при отправке видео.")
 
+    print(f"Получено обновление: {update}")
+
     url = update.message.text.strip()
     if "instagram.com/reel/" in url or "instagram.com/p/" in url:
-        loading_message = await update.message.reply_text(
-            loading_message_text, reply_markup=language_keyboard(user_id))
+        loading_message = await update.message.reply_text(loading_message_text, reply_markup=language_keyboard(user_id))
+        print("Проверяем ссылку...")
         video_path = download_reel(url)
     else:
         return  # Не отвечает на не поддерживаемые сообщения
@@ -70,11 +68,14 @@ async def handle_message(update: Update,
             height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
             cap.release()
 
-            await context.bot.send_video(chat_id=update.effective_chat.id,
-                                         video=open(video_path, 'rb'),
-                                         width=width,
-                                         height=height,
-                                         supports_streaming=True)
+            print("Отправляем видео в чат...")
+            await context.bot.send_video(
+                chat_id=update.effective_chat.id,
+                video=open(video_path, 'rb'),
+                width=width,
+                height=height,
+                supports_streaming=True
+            )
             await loading_message.delete()
             os.remove(video_path)
             # Удаляем сообщение с ссылкой пользователя
@@ -85,29 +86,23 @@ async def handle_message(update: Update,
     else:
         await loading_message.edit_text(error_message_text)
 
-
 # Функция для выбора языка
-async def start_command(update: Update,
-                        context: ContextTypes.DEFAULT_TYPE) -> None:
+async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(
         "Выберите язык / Choose your language / Chọn ngôn ngữ:",
-        reply_markup=language_keyboard(update.effective_user.id))
-
+        reply_markup=language_keyboard(update.effective_user.id)
+    )
 
 # Функция для создания клавиатуры языка
 def language_keyboard(user_id):
-    return InlineKeyboardMarkup(
-        [[InlineKeyboardButton("Русский", callback_data=f"lang_ru_{user_id}")],
-         [InlineKeyboardButton("English", callback_data=f"lang_en_{user_id}")],
-         [
-             InlineKeyboardButton("Tiếng Việt",
-                                  callback_data=f"lang_vi_{user_id}")
-         ]])
-
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton("Русский", callback_data=f"lang_ru_{user_id}")],
+        [InlineKeyboardButton("English", callback_data=f"lang_en_{user_id}")],
+        [InlineKeyboardButton("Tiếng Việt", callback_data=f"lang_vi_{user_id}")]
+    ])
 
 # Функция для обработки выбора языка
-async def language_callback(update: Update,
-                            context: ContextTypes.DEFAULT_TYPE) -> None:
+async def language_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
     await query.answer()
 
@@ -152,7 +147,7 @@ async def language_callback(update: Update,
             "Tôi là trợ lý của bạn để tải video Reels từ Instagram trực tiếp vào Telegram. 📲\n\n"
             "💡 **Tôi hoạt động như thế nào?**\n"
             "1️⃣ Sao chép liên kết tới video Reels từ Instagram.\n"
-            "2️⃣ Gửi liên kết vào cuộc trò chuyện này hoặc nhóm/kênh mà tôi đã được thêm vào."
+            "2️⃣ Gửi liên kết vào cuộc trò chuyện này hoặc nhóm/kênh mà tôi đã được thêm vào.
             "3️⃣ Tôi sẽ tải video và gửi nó đến nhóm hoặc kênh của bạn.\n\n"
             "🛠 **Làm thế nào để thêm tôi vào nhóm hoặc kênh?**\n"
             "1️⃣ Thêm tôi vào nhóm/kênh.\n"
@@ -161,10 +156,7 @@ async def language_callback(update: Update,
             "Nếu bạn có bất kỳ câu hỏi hoặc đề xuất nào, hãy liên hệ với nhà phát triển: [vanyaaronov@gmail.com](mailto:vanyaaronov@gmail.com). Cảm ơn bạn đã chọn tôi! 😊"
         )
 
-    await query.edit_message_text(instruction,
-                                  parse_mode="Markdown",
-                                  reply_markup=language_keyboard(user_id))
-
+    await query.edit_message_text(instruction, parse_mode="Markdown", reply_markup=language_keyboard(user_id))
 
 # Основная функция
 def main():
@@ -176,16 +168,10 @@ def main():
 
     application = Application.builder().token(TELEGRAM_TOKEN).build()
     application.add_handler(CommandHandler("start", start_command))
-    application.add_handler(
-        CallbackQueryHandler(language_callback, pattern=r"^lang_.*"))
-    application.add_handler(
-        MessageHandler(
-            filters.TEXT &
-            (filters.Chat(GROUP_CHAT_ID) | filters.ChatType.PRIVATE),
-            handle_message))
+    application.add_handler(CallbackQueryHandler(language_callback, pattern=r"^lang_.*"))
+    application.add_handler(MessageHandler(filters.TEXT & (filters.Chat(GROUP_CHAT_ID) | filters.ChatType.PRIVATE), handle_message))
     print("Бот запущен. Нажмите Ctrl+C для завершения.")
     application.run_polling()
-
 
 if __name__ == "__main__":
     from keep_alive import keep_alive
