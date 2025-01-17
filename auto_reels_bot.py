@@ -1,38 +1,29 @@
 import os
-import instaloader
-import cv2  # Для работы с видеофайлами
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ContextTypes
+from flask import Flask, request
+from telegram import Update
+from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ContextTypes, InlineKeyboardMarkup, InlineKeyboardButton
 
-# Telegram настройки
+# Настройки бота
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "7648873218:AAHgzpTF8jMosAsT2BFJPyfg9aU_sfaBD9Q")
+WEBHOOK_URL = os.getenv("WEBHOOK_URL", "https://your-app-name.onrender.com")  # Ваш Render Web Service URL
 
-# Инициализация Instaloader
-loader = instaloader.Instaloader()
+# Инициализация Flask
+app = Flask(__name__)
 
-# Глобальный словарь для хранения языка пользователя
+# Telegram Bot Application
+application = Application.builder().token(TELEGRAM_TOKEN).build()
+
+# Хранилище языковых настроек пользователей
 user_languages = {}
 
-# Функция для загрузки рилсов
-def download_reel(url):
-    try:
-        post = instaloader.Post.from_shortcode(loader.context, url.split("/")[-2])
-        loader.download_post(post, target="reels")
-        for file in os.listdir("reels"):
-            if file.endswith(".mp4"):
-                return os.path.join("reels", file)
-    except Exception as e:
-        print(f"Ошибка загрузки рилса: {e}")
-        return None
-
-# Обработка команды /start
+# Функция для команды /start
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(
         "Выберите язык / Choose your language / Chọn ngôn ngữ:",
         reply_markup=language_keyboard(update.effective_user.id)
     )
 
-# Создание клавиатуры выбора языка
+# Клавиатура для выбора языка
 def language_keyboard(user_id):
     return InlineKeyboardMarkup([
         [InlineKeyboardButton("Русский", callback_data=f"lang_ru_{user_id}")],
@@ -84,64 +75,31 @@ async def language_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         )
     await query.edit_message_text(instruction)
 
-# Обработка сообщений с ссылками
+# Обработка текстовых сообщений
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    chat_type = update.effective_chat.type
-    user_id = update.effective_user.id
-    language = user_languages.get(user_id, "ru")
+    text = update.message.text
+    await update.message.reply_text(f"Вы отправили: {text}")
 
-    loading_message = {
-        "ru": "Загружаю рилс, подождите...",
-        "en": "Downloading reel, please wait...",
-        "vi": "Đang tải video, vui lòng đợi..."
-    }.get(language, "Загружаю рилс, подождите...")
-
-    error_message = {
-        "ru": "Не удалось загрузить видео. Проверьте ссылку.",
-        "en": "Failed to download the video. Please check the link.",
-        "vi": "Không thể tải video. Vui lòng kiểm tra liên kết."
-    }.get(language, "Не удалось загрузить видео. Проверьте ссылку.")
-
-    url = update.message.text.strip()
-    if "instagram.com/reel/" in url or "instagram.com/p/" in url:
-        message = await update.message.reply_text(loading_message)
-        video_path = download_reel(url)
-        if video_path:
-            try:
-                cap = cv2.VideoCapture(video_path)
-                width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-                height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-                cap.release()
-
-                caption = f"🎥 Видео предоставлено: {update.effective_user.first_name}"
-                await context.bot.send_video(
-                    chat_id=update.effective_chat.id,
-                    video=open(video_path, 'rb'),
-                    width=width,
-                    height=height,
-                    supports_streaming=True,
-                    caption=caption
-                )
-                await message.delete()
-                os.remove(video_path)
-            except Exception as e:
-                print(f"Ошибка отправки видео: {e}")
-                await message.edit_text(error_message)
-        else:
-            await message.edit_text(error_message)
+# Обработка Webhook запросов от Telegram
+@app.route('/webhook', methods=['POST'])
+def webhook():
+    update = Update.de_json(request.get_json(force=True), application.bot)
+    application.process_update(update)
+    return "OK", 200
 
 # Основная функция запуска
 def main():
-    if not os.path.exists("reels"):
-        os.makedirs("reels")
-
-    application = Application.builder().token(TELEGRAM_TOKEN).build()
+    # Добавление обработчиков команд и сообщений
     application.add_handler(CommandHandler("start", start_command))
     application.add_handler(CallbackQueryHandler(language_callback, pattern=r"^lang_.*"))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
-    print("Бот запущен. Нажмите Ctrl+C для завершения.")
-    application.run_polling()
+    # Установка Webhook
+    application.run_webhook(
+        listen="0.0.0.0",  # Слушаем все подключения
+        port=int(os.getenv("PORT", 8080)),  # Порт для Render Web Service
+        webhook_url=f"{WEBHOOK_URL}/webhook"  # URL для Telegram Webhook
+    )
 
 if __name__ == "__main__":
     main()
