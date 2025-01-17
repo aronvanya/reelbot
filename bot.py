@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 # Инициализация Telegram Bot
 application = Application.builder().token(TELEGRAM_TOKEN).build()
 
-# Маршрут для проверки сервера
+# Маршрут для проверки работы сервера
 @app.route("/", methods=["GET"])
 def home():
     return "Сервер Flask работает с Telegram Webhook!", 200
