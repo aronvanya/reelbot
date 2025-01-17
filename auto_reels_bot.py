@@ -177,16 +177,9 @@ async def language_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) 
             "Nếu bạn có bất kỳ câu hỏi hoặc đề xuất nào, hãy liên hệ với nhà phát triển: [vanyaaronov@gmail.com](mailto:vanyaaronov@gmail.com). Cảm ơn bạn đã chọn tôi! 😊"
         )
 
-    await query.edit_message_text(instruction, parse_mode="Markdown", reply_markup=language_keyboard(user_id))
+    if query.message.text != instruction:
+        await query.edit_message_text(instruction, parse_mode="Markdown", reply_markup=language_keyboard(user_id))
 
-# Функция для обработки ошибок
-async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
-    print(f"Исключение поймано: {context.error}")
-    if update and isinstance(update, Update):
-        try:
-            await update.message.reply_text("Произошла ошибка. Попробуйте позже.")
-        except Exception as e:
-            print(f"Ошибка при отправке сообщения об ошибке: {e}")
 
 # Основная функция
 def main():
