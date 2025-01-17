@@ -95,9 +95,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 @app.route("/webhook", methods=["POST"])
 def webhook():
     try:
-        update = Update.de_json(request.get_json(force=True), application.bot)
+        data = request.get_json(force=True)
+        logger.info(f"Получен Webhook: {data}")
+        update = Update.de_json(data, application.bot)
         application.process_update(update)
-        logger.info("Webhook успешно обработан.")
         return "OK", 200
     except Exception as e:
         logger.error(f"Ошибка обработки Webhook: {e}")
