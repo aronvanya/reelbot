@@ -7,7 +7,7 @@ from server import keep_alive  # Импортируем веб-сервер
 
 # Telegram настройки
 TELEGRAM_TOKEN = "7648873218:AAHgzpTF8jMosAsT2BFJPyfg9aU_sfaBD9Q"
-GROUP_CHAT_ID = -1002055756304  # ID вашей группы
+GROUP_CHAT_ID = -1002055756304 # ID вашей группы
 
 # Инициализация Instaloader
 loader = instaloader.Instaloader()
@@ -53,6 +53,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
     print(f"Получено обновление: {update}")
 
+    if not update.message:
+        print("Нет сообщения для обработки")
+        return
+
     url = update.message.text.strip()
     user_name = update.effective_user.first_name
 
@@ -61,6 +65,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         print("Проверяем ссылку...")
         video_path = download_reel(url)
     else:
+        print("Неподдерживаемая ссылка")
         return  # Не отвечает на не поддерживаемые сообщения
 
     if video_path:
@@ -108,6 +113,11 @@ def language_keyboard(user_id):
 # Функция для обработки выбора языка
 async def language_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
+
+    if not query or not query.id:
+        print("Неверный или отсутствующий callback query")
+        return
+
     await query.answer()
 
     data = query.data.split("_")
@@ -173,10 +183,4 @@ def main():
     application = Application.builder().token(TELEGRAM_TOKEN).build()
     application.add_handler(CommandHandler("start", start_command))
     application.add_handler(CallbackQueryHandler(language_callback, pattern=r"^lang_.*"))
-    application.add_handler(MessageHandler(filters.TEXT & (filters.Chat(GROUP_CHAT_ID) | filters.ChatType.PRIVATE), handle_message))
-    print("Бот запущен. Нажмите Ctrl+C для завершения.")
-    application.run_polling()
-
-if __name__ == "__main__":
-    from keep_alive import keep_alive
-    main()
+    application.add_handler(MessageHandler(filters.TEXT & (filters.Chat(GROUP_CHAT_ID) | filters.ChatType.PRIVATE
