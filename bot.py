@@ -2,7 +2,7 @@ import os
 import logging
 from flask import Flask, request
 from telegram import Update
-from telegram.ext import Application, CommandHandler
+from telegram.ext import Application
 
 # Настройки Telegram Bot
 TELEGRAM_TOKEN = "7648873218:AAHgzpTF8jMosAsT2BFJPyfg9aU_sfaBD9Q"
@@ -11,11 +11,11 @@ WEBHOOK_URL = "https://reelbot.onrender.com"
 # Инициализация Flask
 app = Flask(__name__)
 
-# Логирование
+# Настройка логирования
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Инициализация Telegram Bot
+# Telegram Bot Application
 application = Application.builder().token(TELEGRAM_TOKEN).build()
 
 # Маршрут для проверки работы сервера
@@ -36,17 +36,6 @@ def webhook():
         logger.error(f"Ошибка обработки Webhook: {e}")
         return "Ошибка", 500
 
-# Команда /start
-async def start_command(update, context):
-    await update.message.reply_text("👋 Добро пожаловать! Бот работает с Webhook.")
-
-# Добавление команды
-application.add_handler(CommandHandler("start", start_command))
-
-# Установка Webhook и запуск приложения
+# Запуск Flask
 if __name__ == "__main__":
-    application.run_webhook(
-        listen="0.0.0.0",
-        port=int(os.getenv("PORT", 8080)),
-        webhook_url=f"{WEBHOOK_URL}/webhook"
-    )
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 8080)))
