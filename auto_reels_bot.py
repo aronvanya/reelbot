@@ -5,7 +5,7 @@ from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQu
 
 # Настройки бота
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "7648873218:AAHgzpTF8jMosAsT2BFJPyfg9aU_sfaBD9Q")
-WEBHOOK_URL = os.getenv("WEBHOOK_URL", "https://your-app-name.onrender.com")  # Ваш Render Web Service URL
+WEBHOOK_URL = os.getenv("WEBHOOK_URL", "https://reelbot.onrender.com")  # Ваш Render Web Service URL
 
 # Инициализация Flask
 app = Flask(__name__)
