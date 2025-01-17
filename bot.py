@@ -1,11 +1,11 @@
 import os
 from flask import Flask, request
-from telegram import Update
-from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ContextTypes, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ContextTypes
 
 # Настройки бота
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "7648873218:AAHgzpTF8jMosAsT2BFJPyfg9aU_sfaBD9Q")
-WEBHOOK_URL = os.getenv("WEBHOOK_URL", "https://reelbot.onrender.com")  # Ваш Render Web Service URL
+WEBHOOK_URL = os.getenv("WEBHOOK_URL", "https://reelbot.onrender.com")  # URL Render Web Service
 
 # Инициализация Flask
 app = Flask(__name__)
