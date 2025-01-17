@@ -7,7 +7,7 @@ from server import keep_alive  # Импортируем веб-сервер
 
 # Telegram настройки
 TELEGRAM_TOKEN = "7648873218:AAHgzpTF8jMosAsT2BFJPyfg9aU_sfaBD9Q"
-GROUP_CHAT_ID = -1002055756304 # ID вашей группы
+GROUP_CHAT_ID = -1002055756304  # ID вашей группы
 
 # Инициализация Instaloader
 loader = instaloader.Instaloader()
@@ -112,7 +112,6 @@ def language_keyboard(user_id):
         [InlineKeyboardButton("English", callback_data=f"lang_en_{user_id}")],
         [InlineKeyboardButton("Tiếng Việt", callback_data=f"lang_vi_{user_id}")]
     ])
-
 # Функция для обработки выбора языка
 async def language_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
@@ -180,6 +179,14 @@ async def language_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     if query.message.text != instruction:
         await query.edit_message_text(instruction, parse_mode="Markdown", reply_markup=language_keyboard(user_id))
 
+# Функция для обработки ошибок
+async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+    print(f"Исключение поймано: {context.error}")
+    if update and isinstance(update, Update):
+        try:
+            await update.message.reply_text("Произошла ошибка. Попробуйте позже.")
+        except Exception as e:
+            print(f"Ошибка при отправке сообщения об ошибке: {e}")
 
 # Основная функция
 def main():
