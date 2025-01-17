@@ -110,7 +110,8 @@ def language_keyboard(user_id):
         [InlineKeyboardButton("English", callback_data=f"lang_en_{user_id}")],
         [InlineKeyboardButton("Tiếng Việt", callback_data=f"lang_vi_{user_id}")]
     ])
-    # Функция для обработки выбора языка
+
+# Функция для обработки выбора языка
 async def language_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
 
@@ -131,46 +132,46 @@ async def language_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     if lang == "ru":
         user_languages[user_id] = "ru"
         instruction = (
-            "👋 Добро пожаловать!\\n\\n"
-            "Я — ваш помощник для загрузки рилсов из Instagram прямо в Telegram. 📲\\n\\n"
-            "💡 **Как я работаю?**\\n"
-            "1️⃣ Скопируйте ссылку на рилс из Instagram.\\n"
-            "2️⃣ Отправьте ссылку в этот чат или в группу/канал, где я добавлен.\\n"
-            "3️⃣ Я загружу видео и пришлю его в вашу группу или канал.\\n\\n"
-            "🛠 **Как добавить меня в группу или канал?**\\n"
-            "1️⃣ Добавьте меня в группу/канал.\\n"
-            "2️⃣ Назначьте меня администратором.\\n"
-            "3️⃣ Наслаждайтесь автоматической загрузкой рилсов! 🎉\\n\\n"
+            "👋 Добро пожаловать!\n\n"
+            "Я — ваш помощник для загрузки рилсов из Instagram прямо в Telegram. 📲\n\n"
+            "💡 **Как я работаю?**\n"
+            "1️⃣ Скопируйте ссылку на рилс из Instagram.\n"
+            "2️⃣ Отправьте ссылку в этот чат или в группу/канал, где я добавлен.\n"
+            "3️⃣ Я загружу видео и пришлю его в вашу группу или канал.\n\n"
+            "🛠 **Как добавить меня в группу или канал?**\n"
+            "1️⃣ Добавьте меня в группу/канал.\n"
+            "2️⃣ Назначьте меня администратором.\n"
+            "3️⃣ Наслаждайтесь автоматической загрузкой рилсов! 🎉\n\n"
             "Если у вас возникли вопросы или предложения, пишите разработчику: [vanyaaronov@gmail.com](mailto:vanyaaronov@gmail.com). Спасибо, что выбрали меня! 😊"
         )
     elif lang == "en":
         user_languages[user_id] = "en"
         instruction = (
-            "👋 Welcome!\\n\\n"
-            "I am your assistant for downloading Instagram reels directly to Telegram. 📲\\n\\n"
-            "💡 **How do I work?**\\n"
-            "1️⃣ Copy the link to a reel from Instagram.\\n"
-            "2️⃣ Send the link to this chat or a group/channel where I am added.\\n"
-            "3️⃣ I will download the video and send it to your group or channel.\\n\\n"
-            "🛠 **How to add me to a group or channel?**\\n"
-            "1️⃣ Add me to the group/channel.\\n"
-            "2️⃣ Make me an admin.\\n"
-            "3️⃣ Enjoy automatic reel downloads! 🎉\\n\\n"
+            "👋 Welcome!\n\n"
+            "I am your assistant for downloading Instagram reels directly to Telegram. 📲\n\n"
+            "💡 **How do I work?**\n"
+            "1️⃣ Copy the link to a reel from Instagram.\n"
+            "2️⃣ Send the link to this chat or a group/channel where I am added.\n"
+            "3️⃣ I will download the video and send it to your group or channel.\n\n"
+            "🛠 **How to add me to a group or channel?**\n"
+            "1️⃣ Add me to the group/channel.\n"
+            "2️⃣ Make me an admin.\n"
+            "3️⃣ Enjoy automatic reel downloads! 🎉\n\n"
             "If you have any questions or suggestions, contact the developer: [vanyaaronov@gmail.com](mailto:vanyaaronov@gmail.com). Thank you for choosing me! 😊"
         )
     elif lang == "vi":
         user_languages[user_id] = "vi"
         instruction = (
-            "👋 Chào mừng bạn!\\n\\n"
-            "Tôi là trợ lý của bạn để tải video Reels từ Instagram trực tiếp vào Telegram. 📲\\n\\n"
-            "💡 **Tôi hoạt động như thế nào?**\\n"
-            "1️⃣ Sao chép liên kết tới video Reels từ Instagram.\\n"
-            "2️⃣ Gửi liên kết vào cuộc trò chuyện này hoặc nhóm/kênh mà tôi đã được thêm vào.\\n"
-            "3️⃣ Tôi sẽ tải video và gửi nó đến nhóm hoặc kênh của bạn.\\n\\n"
-            "🛠 **Làm thế nào để thêm tôi vào nhóm hoặc kênh?**\\n"
-            "1️⃣ Thêm tôi vào nhóm/kênh.\\n"
-            "2️⃣ Đặt tôi làm quản trị viên.\\n"
-            "3️⃣ Tận hưởng việc tải video Reels tự động! 🎉\\n\\n"
+            "👋 Chào mừng bạn!\n\n"
+            "Tôi là trợ lý của bạn để tải video Reels từ Instagram trực tiếp vào Telegram. 📲\n\n"
+            "💡 **Tôi hoạt động như thế nào?**\n"
+            "1️⃣ Sao chép liên kết tới video Reels từ Instagram.\n"
+            "2️⃣ Gửi liên kết vào cuộc trò chuyện này hoặc nhóm/kênh mà tôi đã được thêm vào.\n"
+            "3️⃣ Tôi sẽ tải video và gửi nó đến nhóm hoặc kênh của bạn.\n\n"
+            "🛠 **Làm thế nào để thêm tôi vào nhóm hoặc kênh?**\n"
+            "1️⃣ Thêm tôi vào nhóm/kênh.\n"
+            "2️⃣ Đặt tôi làm quản trị viên.\n"
+            "3️⃣ Tận hưởng việc tải video Reels tự động! 🎉\n\n"
             "Nếu bạn có bất kỳ câu hỏi hoặc đề xuất nào, hãy liên hệ với nhà phát triển: [vanyaaronov@gmail.com](mailto:vanyaaronov@gmail.com). Cảm ơn bạn đã chọn tôi! 😊"
         )
 
@@ -202,4 +203,7 @@ def main():
     application.add_error_handler(error_handler)
 
     print("Бот запущен. Нажмите Ctrl+C для завершения.")
-    application.run_polling()  # Переключаемся на polling
+    application.run_polling()
+
+if __name__ == "__main__":
+    main()
