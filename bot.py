@@ -8,12 +8,12 @@ from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQu
 TELEGRAM_TOKEN = "7648873218:AAHgzpTF8jMosAsT2BFJPyfg9aU_sfaBD9Q"
 WEBHOOK_URL = "https://reelbot.onrender.com"
 
-# Логи
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
 # Инициализация Flask
 app = Flask(__name__)
+
+# Настройка логирования
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Telegram Bot Application
 application = Application.builder().token(TELEGRAM_TOKEN).build()
@@ -50,7 +50,6 @@ async def language_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     lang = data[1]
     user_id = int(data[2])
 
-    # Инструкции на разных языках
     if lang == "ru":
         user_languages[user_id] = "ru"
         instruction = (
@@ -98,13 +97,13 @@ def webhook():
     try:
         update = Update.de_json(request.get_json(force=True), application.bot)
         application.process_update(update)
-        logger.info(f"Получено обновление: {update}")
+        logger.info("Webhook успешно обработан.")
         return "OK", 200
     except Exception as e:
         logger.error(f"Ошибка обработки Webhook: {e}")
         return "Ошибка", 500
 
-# Тестовый маршрут для проверки работы
+# Тестовый маршрут для проверки работы сервера
 @app.route("/", methods=["GET"])
 def home():
     return "Бот работает!", 200
@@ -118,7 +117,7 @@ def main():
 
     # Установка Webhook
     application.run_webhook(
-        listen="0.0.0.0",  # Слушаем все подключения
+        listen="0.0.0.0",  # Принимаем все подключения
         port=int(os.getenv("PORT", 8080)),  # Порт для Render Web Service
         webhook_url=f"{WEBHOOK_URL}/webhook",  # URL для Telegram Webhook
     )
