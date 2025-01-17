@@ -1,4 +1,5 @@
-import os  # Добавлено импортирование модуля os
+import os
+import logging
 from flask import Flask, request
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ContextTypes
@@ -6,6 +7,10 @@ from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQu
 # Настройки бота
 TELEGRAM_TOKEN = "7648873218:AAHgzpTF8jMosAsT2BFJPyfg9aU_sfaBD9Q"
 WEBHOOK_URL = "https://reelbot.onrender.com"
+
+# Логи
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Инициализация Flask
 app = Flask(__name__)
@@ -90,9 +95,14 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 # Обработка Webhook запросов от Telegram
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    update = Update.de_json(request.get_json(force=True), application.bot)
-    application.process_update(update)
-    return "OK", 200
+    try:
+        update = Update.de_json(request.get_json(force=True), application.bot)
+        application.process_update(update)
+        logger.info(f"Получено обновление: {update}")
+        return "OK", 200
+    except Exception as e:
+        logger.error(f"Ошибка обработки Webhook: {e}")
+        return "Ошибка", 500
 
 # Тестовый маршрут для проверки работы
 @app.route("/", methods=["GET"])
