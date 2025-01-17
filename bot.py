@@ -4,7 +4,7 @@ from flask import Flask, request
 from telegram import Update
 from telegram.ext import Application, CommandHandler
 
-# Настройки Telegram Bot
+# Настройки Telegram
 TELEGRAM_TOKEN = "7648873218:AAHgzpTF8jMosAsT2BFJPyfg9aU_sfaBD9Q"
 WEBHOOK_URL = "https://reelbot.onrender.com"
 
@@ -15,10 +15,10 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Telegram Bot Application
+# Инициализация Telegram Bot
 application = Application.builder().token(TELEGRAM_TOKEN).build()
 
-# Маршрут для проверки работы сервера
+# Маршрут для проверки сервера
 @app.route("/", methods=["GET"])
 def home():
     return "Сервер Flask работает с Telegram Webhook!", 200
