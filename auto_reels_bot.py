@@ -202,12 +202,4 @@ def main():
     application.add_error_handler(error_handler)
 
     print("Бот запущен. Нажмите Ctrl+C для завершения.")
-    application.run_webhook(
-        listen="0.0.0.0",
-        port=int(os.getenv("PORT", "8080")),
-        url_path="webhook",
-        webhook_url=f"https://{os.getenv('RENDER_EXTERNAL_URL')}/webhook"
-    )
-
-if __name__ == "__main__":
-    main()
+    application.run_polling()  # Переключаемся на polling
