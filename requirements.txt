@@ -1,2 +1,4 @@
 flask
 python-telegram-bot[webhooks]==20.3
+instaloader
+opencv-python
